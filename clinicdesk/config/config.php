@@ -1,14 +1,9 @@
 <?php
-// config/config.php
-
-// اسم المشروع
 define('APP_NAME', 'ClinicDesk');
-
-// الرابط الرئيسي للمشروع (تأكد من مطابقة اسم المجلد لديك)
-define('BASE_URL', 'http://localhost/clinicdesk/');
-
-// عدد العناصر في الصفحة الواحدة للترقيم
+define('BASE_URL', 'http://localhost/clinicdesk');
 define('ITEMS_PER_PAGE', 10);
 
-// الحد الأقصى لحجم الملفات المرفوعة (1 ميجابايت كحد أقصى كما هو مطلوب حرفياً)
-define('MAX_FILE_SIZE', 1048576);
+// محددات الرفع والحماية
+define('MAX_FILE_SIZE', 1048576); // 1 ميغابايت
+define('ALLOWED_IMAGE_TYPES', ['image/jpeg', 'image/png']);
+define('ALLOWED_DOC_TYPES', ['application/pdf']);
