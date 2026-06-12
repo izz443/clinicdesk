@@ -1,35 +1,45 @@
 <?php
-// models/SpecializationModel.php
-
 require_once __DIR__ . '/BaseModel.php';
 
 class SpecializationModel extends BaseModel {
-
-    public function __construct() {
-        parent::__construct();
-    }
-
+    
+    // جلب جميع التخصصات المتوفرة مرتبة أبجدياً
     public function getAll() {
-        $sql = "SELECT * FROM specializations ORDER BY id DESC";
-        $stmt = $this->db->query($sql);
-        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $sql = "SELECT * FROM specializations ORDER BY name ASC";
+        $result = $this->conn->query($sql);
+        return $result->fetch_all(MYSQLI_ASSOC);
     }
 
+    // جلب تخصص بواسطة المعرف ID
+    public function getById($id) {
+        $sql = "SELECT * FROM specializations WHERE id = ? LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_assoc();
+    }
+
+    // إضافة تخصص طبي جديد لنظام العيادة
     public function create($name) {
         $sql = "INSERT INTO specializations (name) VALUES (?)";
-        return $this->db->query($sql, "s", [$name]);
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("s", $name);
+        return $stmt->execute();
     }
 
+    // تحديث مسمى تخصص موجود
+    public function update($id, $name) {
+        $sql = "UPDATE specializations SET name = ? WHERE id = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("si", $name, $id);
+        return $stmt->execute();
+    }
+
+    // حذف تخصص طبي (بشرط ألا يكون مرتبطاً بأطباء بناءً على قيد RESTRICT)
     public function delete($id) {
         $sql = "DELETE FROM specializations WHERE id = ?";
-        return $this->db->query($sql, "i", [$id]);
-    }
-
-    // دالة حساب إجمالي التخصصات للداشبورد
-    public function countAll() {
-        $sql = "SELECT COUNT(*) as total FROM specializations";
-        $stmt = $this->db->query($sql);
-        $result = $stmt->get_result()->fetch_assoc();
-        return $result['total'] ?? 0;
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $id);
+        return $stmt->execute();
     }
 }
