@@ -1,147 +1,89 @@
-<?php
-// views/users/index.php
+<?php include __DIR__ . '/../partials/header.php'; ?>
+<?php include __DIR__ . '/../partials/sidebar.php'; ?>
+<?php include __DIR__ . '/../partials/navbar.php'; ?>
+<?php include __DIR__ . '/../partials/alerts.php'; ?>
 
-require_once __DIR__ . '/../partials/header.php';
-require_once __DIR__ . '/../partials/navbar.php';
-require_once __DIR__ . '/../partials/sidebar.php';
-?>
-
-<div class="content-wrapper">
-  <div class="content-header">
-    <div class="container-fluid">
-      <div class="row mb-2">
-        <div class="col-sm-6 text-right">
-          <h1 class="m-0 text-dark"><?= sanitize($pageTitle); ?></h1>
-        </div>
-      </div>
+<div class="container-fluid">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800"><i class="fa-solid fa-users text-primary me-2"></i> إدارة المرضى</h1>
+        <a href="index.php?page=users&action=create" class="btn btn-primary fw-bold shadow-sm">
+            <i class="fa-solid fa-user-plus me-1"></i> إضافة حساب مريض
+        </a>
     </div>
-  </div>
 
-  <section class="content">
-    <div class="container-fluid">
-
-      <?php if ($success = flash('success')): ?>
-        <div class="alert alert-success text-right"><?= sanitize($success); ?></div>
-      <?php endif; ?>
-      <?php if ($error = flash('error')): ?>
-        <div class="alert alert-danger text-right"><?= sanitize($error); ?></div>
-      <?php endif; ?>
-
-      <div class="row">
-        <div class="col-12 text-right">
-          
-          <div class="card card-primary card-tabs">
-            <div class="card-header p-0 pt-1">
-              <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
-                <li class="nav-item">
-                  <a class="nav-link active" id="doctors-tab" data-toggle="pill" href="#doctors-content" role="tab"><b>قائمة الأطباء</b></a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" id="patients-tab" data-toggle="pill" href="#patients-content" role="tab"><b>قائمة المرضى</b></a>
-                </li>
-              </ul>
-            </div>
-            
-            <div class="card-body">
-              <div class="tab-content">
-                
-                <div class="tab-pane fade show active" id="doctors-content" role="tabpanel">
-                  <table class="table table-bordered table-striped text-center">
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th>الاسم</th>
-                        <th>البريد الإلكتروني</th>
-                        <th>حالة الحساب</th>
-                        <th>الإجراء</th>
-                      </tr>
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle mb-0 text-center">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>الصورة الرمزية</th>
+                            <th>الاسم كاملاً</th>
+                            <th>البريد الإلكتروني</th>
+                            <th>رقم الهاتف</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات والتحكم</th>
+                        </tr>
                     </thead>
                     <tbody>
-                      <?php if(empty($doctors)): ?>
-                        <tr><td colspan="5" class="text-muted">لا يوجد أطباء مضافين حالياً.</td></tr>
-                      <?php else: ?>
-                        <?php foreach($doctors as $index => $doc): ?>
-                          <tr>
-                            <td><?= $index + 1; ?></td>
-                            <td><b><?= sanitize($doc['name']); ?></b></td>
-                            <td><?= sanitize($doc['email']); ?></td>
-                            <td>
-                              <?= $doc['is_active'] == 1 
-                                ? '<span class="badge badge-success">نشط</span>' 
-                                : '<span class="badge badge-danger">مجمد</span>'; ?>
-                            </td>
-                            <td>
-                              <form action="index.php?page=users&action=toggle-status" method="POST" style="display:inline;">
-                                <input type="hidden" name="csrf_token" value="<?= CSRF::generateToken(); ?>">
-                                <input type="hidden" name="id" value="<?= (int)$doc['id']; ?>">
-                                <input type="hidden" name="is_active" value="<?= (int)$doc['is_active']; ?>">
-                                <button type="submit" class="btn <?= $doc['is_active'] == 1 ? 'btn-warning' : 'btn-success'; ?> btn-sm">
-                                  <i class="fas <?= $doc['is_active'] == 1 ? 'fa-user-slash' : 'fa-user-check'; ?>"></i>
-                                  <?= $doc['is_active'] == 1 ? 'تجميد الحساب' : 'تنشيط الحساب'; ?>
-                                </button>
-                              </form>
-                            </td>
-                          </tr>
-                        <?php endforeach; ?>
-                      <?php endif; ?>
+                        <?php if (empty($users)): ?>
+                            <tr>
+                                <td colspan="6" class="text-center py-4 fw-bold text-muted">لا يوجد مرضى مسجلين في النظام حالياً.</td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($users as $u): ?>
+                                <tr>
+                                    <td>
+                                        <?php if (!empty($u['avatar'])): ?>
+                                            <img src="public/<?php echo $u['avatar']; ?>" class="rounded-circle border shadow-sm" width="45" height="45" alt="Avatar">
+                                        <?php else: ?>
+                                            <i class="fa-solid fa-user-circle text-secondary fs-2"></i>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="fw-bold"><?php echo $u['name']; ?></td>
+                                    <td><?php echo $u['email']; ?></td>
+                                    <td><?php echo !empty($u['phone']) ? $u['phone'] : 'غير مسجل'; ?></td>
+                                    <td>
+                                        <?php if ((int)$u['is_active'] === 1): ?>
+                                            <span class="badge bg-success px-2 py-1 fs-7">نشط</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-danger px-2 py-1 fs-7">معطل</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <a href="index.php?page=users&action=toggle&id=<?php echo $u['id']; ?>" class="btn btn-sm btn-outline-warning fw-bold me-1">
+                                            <i class="fa-solid fa-power-off"></i> تبديل الحالة
+                                        </a>
+                                        <a href="index.php?page=users&action=delete&id=<?php echo $u['id']; ?>" class="btn btn-sm btn-outline-danger fw-bold" onclick="return confirm('هل أنت متأكد من حذف حساب المريض نهائياً؟');">
+                                            <i class="fa-solid fa-trash"></i> حذف
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </tbody>
-                  </table>
-                </div>
-
-                <div class="tab-pane fade" id="patients-content" role="tabpanel">
-                  <table class="table table-bordered table-striped text-center">
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th>الاسم</th>
-                        <th>البريد الإلكتروني</th>
-                        <th>حالة الحساب</th>
-                        <th>الإجراء</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <?php if(empty($patients)): ?>
-                        <tr><td colspan="5" class="text-muted">لا يوجد مرضى مسجلين حالياً.</td></tr>
-                      <?php else: ?>
-                        <?php foreach($patients as $index => $pat): ?>
-                          <tr>
-                            <td><?= $index + 1; ?></td>
-                            <td><b><?= sanitize($pat['name']); ?></b></td>
-                            <td><?= sanitize($pat['email']); ?></td>
-                            <td>
-                              <?= $pat['is_active'] == 1 
-                                ? '<span class="badge badge-success">نشط</span>' 
-                                : '<span class="badge badge-danger">مجمد</span>'; ?>
-                            </td>
-                            <td>
-                              <form action="index.php?page=users&action=toggle-status" method="POST" style="display:inline;">
-                                <input type="hidden" name="csrf_token" value="<?= CSRF::generateToken(); ?>">
-                                <input type="hidden" name="id" value="<?= (int)$pat['id']; ?>">
-                                <input type="hidden" name="is_active" value="<?= (int)$pat['is_active']; ?>">
-                                <button type="submit" class="btn <?= $pat['is_active'] == 1 ? 'btn-warning' : 'btn-success'; ?> btn-sm">
-                                  <i class="fas <?= $pat['is_active'] == 1 ? 'fa-user-slash' : 'fa-user-check'; ?>"></i>
-                                  <?= $pat['is_active'] == 1 ? 'تجميد الحساب' : 'تنشيط الحساب'; ?>
-                                </button>
-                              </form>
-                            </td>
-                          </tr>
-                        <?php endforeach; ?>
-                      <?php endif; ?>
-                    </tbody>
-                  </table>
-                </div>
-
-              </div>
+                </table>
             </div>
-          </div>
-
         </div>
-      </div>
-
     </div>
-  </section>
+
+    <?php if ($paginator->totalPages() > 1): ?>
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center shadow-sm">
+                <li class="page-item <?php echo !$paginator->hasPrev() ? 'disabled' : ''; ?>">
+                    <a class="page-link font-weight-bold" href="index.php?page=users&action=index&p=<?php echo $paginator->getCurrentPage() - 1; ?>">السابق</a>
+                </li>
+                <?php for ($i = 1; $i <= $paginator->totalPages(); $i++): ?>
+                    <li class="page-item <?php echo ($paginator->getCurrentPage() == $i) ? 'active' : ''; ?>">
+                        <a class="page-link font-weight-bold" href="index.php?page=users&action=index&p=<?php echo $i; ?>"><?php echo $i; ?></a>
+                    </li>
+                <?php endfor; ?>
+                <li class="page-item <?php echo !$paginator->hasNext() ? 'disabled' : ''; ?>">
+                    <a class="page-link font-weight-bold" href="index.php?page=users&action=index&p=<?php echo $paginator->getCurrentPage() + 1; ?>">التالي</a>
+                </li>
+            </ul>
+        </nav>
+    <?php endif; ?>
 </div>
 
-<?php
-require_once __DIR__ . '/../partials/footer.php';
-?>
+<?php include __DIR__ . '/../partials/footer.php'; ?>
