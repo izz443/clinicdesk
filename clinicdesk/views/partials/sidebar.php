@@ -1,75 +1,30 @@
-<?php
-// views/partials/sidebar.php
-
-$currentUser = $_SESSION['user'] ?? null;
-$role = $currentUser['role'] ?? '';
-?>
-
-<aside class="main-sidebar sidebar-dark-primary elevation-4" style="direction: rtl; text-align: right;">
-  <a href="index.php?page=dashboard" class="brand-link text-center">
-    <span class="brand-text font-weight-light">نظام ClinicDesk</span>
-  </a>
-
-  <div class="sidebar">
-    <div class="user-panel mt-3 pb-3 mb-3 d-flex justify-content-start align-items-center">
-      <div class="info w-100 text-center">
-        <a href="#" class="d-block">مرحباً، <?= sanitize($currentUser['name'] ?? 'مستخدم'); ?></a>
-        <span class="badge badge-info"><?= $role === 'admin' ? 'مسؤول النظام' : ($role === 'doctor' ? 'طبيب المعالج' : 'مريض'); ?></span>
-      </div>
+<?php $role = Auth::role(); ?>
+<nav id="sidebar">
+    <div class="sidebar-header">
+        <h3>ClinicDesk</h3>
     </div>
-
-    <nav class="mt-2">
-      <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+    <ul class="list-unstyled components">
+        <li class="<?php echo ($_GET['page'] == 'dashboard') ? 'active' : ''; ?>">
+            <a href="index.php?page=dashboard&action=index"><i class="fa-solid fa-gauge"></i> الرئيسية</a>
+        </li>
         
         <?php if ($role === 'admin'): ?>
-          <li class="nav-item">
-            <a href="index.php?page=dashboard" class="nav-link">
-              <i class="nav-icon fas fa-tachometer-alt"></i>
-              <p>اللوحة الرئيسية</p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="index.php?page=specializations" class="nav-link">
-              <i class="nav-icon fas fa-stethoscope"></i>
-              <p>إدارة التخصصات</p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="index.php?page=users" class="nav-link">
-              <i class="nav-icon fas fa-users"></i>
-              <p>المستخدمين والأطباء</p>
-            </a>
-          </li>
+            <li class="<?php echo ($_GET['page'] == 'users') ? 'active' : ''; ?>">
+                <a href="index.php?page=users&action=index"><i class="fa-solid fa-users"></i> إدارة المرضى</a>
+            </li>
+            <li class="<?php echo ($_GET['page'] == 'doctors') ? 'active' : ''; ?>">
+                <a href="index.php?page=doctors&action=index"><i class="fa-solid fa-user-md"></i> إدارة الأطباء</a>
+            </li>
+            <li class="<?php echo ($_GET['page'] == 'reports') ? 'active' : ''; ?>">
+                <a href="index.php?page=reports&action=index"><i class="fa-solid fa-chart-line"></i> التقارير المالية</a>
+            </li>
         <?php endif; ?>
 
-        <?php if ($role === 'doctor'): ?>
-          <li class="nav-item">
-            <a href="index.php?page=doctor/dashboard" class="nav-link">
-              <i class="nav-icon fas fa-calendar-check"></i>
-              <p>مواعيد العيادة</p>
-            </a>
-          </li>
+        <?php if ($role === 'patient' || $role === 'doctor' || $role === 'admin'): ?>
+            <li class="<?php echo ($_GET['page'] == 'appointments') ? 'active' : ''; ?>">
+                <a href="index.php?page=appointments&action=index"><i class="fa-solid fa-calendar-check"></i> المواعيد الطبية</a>
+            </li>
         <?php endif; ?>
-
-        <?php if ($role === 'patient'): ?>
-          <li class="nav-item">
-            <a href="index.php?page=patient/dashboard" class="nav-link">
-              <i class="nav-icon fas fa-calendar-plus"></i>
-              <p>حجز موعد جديد</p>
-            </a>
-          </li>
-        <?php endif; ?>
-
-        <hr style="border-color: #4f5962; width: 100%;">
-
-        <li class="nav-item">
-          <a href="index.php?page=auth/logout" class="nav-link text-danger">
-            <i class="nav-icon fas fa-sign-out-alt"></i>
-            <p>تسجيل الخروج</p>
-          </a>
-        </li>
-
-      </ul>
-    </nav>
-  </div>
-</aside>
+    </ul>
+</nav>
+<div id="content">
