@@ -1,34 +1,53 @@
 <?php
-// controllers/DashboardController.php
-
 require_once __DIR__ . '/../models/UserModel.php';
-require_once __DIR__ . '/../models/SpecializationModel.php';
+require_once __DIR__ . '/../models/DoctorModel.php';
 require_once __DIR__ . '/../models/AppointmentModel.php';
-require_once __DIR__ . '/../core/Auth.php';
-require_once __DIR__ . '/../core/helpers.php';
 
 class DashboardController {
+    private $userModel;
+    private $doctorModel;
+    private $appointmentModel;
 
     public function __construct() {
-        // التعديل هنا: استخدام دالة check المتوافقة مع نظامك لمنع الخطأ
+        // فرض حماية عامة: يجب أن يكون مسجلاً للدخول لرؤية أي لوحة تحكم
         if (!Auth::check()) {
-            redirect('auth/login');
+            redirect('index.php?page=auth&action=login');
         }
+        $this->userModel = new UserModel();
+        $this->doctorModel = new DoctorModel();
+        $this->appointmentModel = new AppointmentModel();
     }
 
     public function index() {
-        $pageTitle = "لوحة التحكم الرئيسية";
-        
-        $userModel = new UserModel();
-        $specModel = new SpecializationModel();
-        $appointmentModel = new AppointmentModel();
+        $user = Auth::currentUser();
+        $role = $user['role'];
 
-        // جلب الإحصائيات الحقيقية من قاعدة البيانات
-        $totalDoctors = $userModel->countAll('doctor');
-        $totalPatients = $userModel->countAll('patient');
-        $totalSpecializations = $specModel->countAll();
-        $totalAppointments = $appointmentModel->countAll();
-
-        require_once __DIR__ . '/../views/dashboard/admin.php';
+        if ($role === 'admin') {
+            // جلب إحصائيات الأدمن
+            $stats = [
+                'total_patients' => $this->userModel->countAll('patient'),
+                'total_doctors' => $this->doctorModel->countAll(),
+                'total_appointments' => $this->appointmentModel->countAll('admin', null)
+            ];
+            include __DIR__ . '/../views/dashboard/admin.php';
+        } 
+        elseif ($role === 'doctor') {
+            // جلب بيانات الطبيب ومواعيده الخاصة
+            $doctorData = $this->doctorModel->getByUserId($user['id']);
+            $stats = [
+                'total_appointments' => $doctorData ? $this->appointmentModel->countAll('doctor', $doctorData['id']) : 0
+            ];
+            include __DIR__ . '/../views/dashboard/doctor.php';
+        } 
+        elseif ($role === 'patient') {
+            // جلب مواعيد المريض الخاصة به
+            $stats = [
+                'total_appointments' => $this->appointmentModel->countAll('patient', $user['id'])
+            ];
+            include __DIR__ . '/../views/dashboard/patient.php';
+        } 
+        else {
+            Auth::logout();
+        }
     }
 }
